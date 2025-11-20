@@ -28,8 +28,8 @@ Aplicação full-stack em Node.js + EJS para gerir o programa de afiliados da RS
 
 2. **Configurar base de dados**
 
-   - Criar uma base de dados MySQL (ex.: `rst_affiliates`).
-- Executar `database/schema.sql` (cria tabelas com prefixo `psrst_` para alinhar com o padrão do Prestashop).
+   - Criar uma base de dados MySQL (ex.: `rst_afiliados`).
+   - Executar `database/schema.sql` (cria todas as tabelas necessárias na base de dados da plataforma; nada é gravado na base de dados do Prestashop).
 
 3. **Variáveis de ambiente** (opcional via `.env`)
 
@@ -40,7 +40,7 @@ Aplicação full-stack em Node.js + EJS para gerir o programa de afiliados da RS
    DB_PORT=3306
    DB_USER=root
    DB_PASS=senha
-   DB_NAME=rst_affiliates
+   DB_NAME=rst_afiliados
    ```
 
 4. **Arrancar servidor**
@@ -67,7 +67,7 @@ Aplicação full-stack em Node.js + EJS para gerir o programa de afiliados da RS
 `POST /admin/orders/sync` lê as ordens em estado pago/completo via webservice Prestashop e:
 
 1. Identifica o afiliado por código de desconto ou associação do cliente.
-2. Atualiza/associa o cliente ao afiliado mais recente.
+2. Guarda/atualiza o cliente (sempre na BD da plataforma) com o campo `id_current_afiliate` associado ao afiliado mais recente.
 3. Calcula comissões por produto respeitando regras específicas por marca ou regra default.
 4. Regista as comissões como `pending` para posterior pagamento.
 
@@ -84,8 +84,8 @@ Certifique-se de definir `PRESTASHOP_API_URL` (ex.: `https://rstferramentas.com/
 
 Ao fazer push para a branch main, o workflow .github/workflows/deploy.yml envia os ficheiros do projeto para o cPanel via FTP/FTPS. Antes de ativar o workflow, crie estes *repository secrets* no GitHub:
 
-- CPANEL_HOST: hostname ou IP do servidor FTP/FTPS.
-- CPANEL_USERNAME: utilizador com acesso a pasta /home/redsuper/rstferramentas.com/_afiliados/.
-- CPANEL_PASSWORD: password desse utilizador.
+- FTP_HOST: hostname ou IP do servidor FTP/FTPS.
+- FTP_USERNAME: utilizador com acesso a pasta /home/redsuper/rstferramentas.com/_afiliados/.
+- FTP_PASSWORD: password desse utilizador.
 
 Caso o diretorio ou protocolo mude, ajuste os campos server-dir ou protocol dentro do workflow.

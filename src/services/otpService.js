@@ -8,7 +8,7 @@ function generateOtp() {
 async function storeOtp(email, otpCode) {
   const expiresAt = dayjs().add(10, 'minute').toDate();
   await db.query(
-    `INSERT INTO psrst_otps (email, otp_code, expires_at)
+    `INSERT INTO otps (email, otp_code, expires_at)
      VALUES (?, ?, ?)
     `,
     [email, otpCode, expiresAt],
@@ -18,7 +18,7 @@ async function storeOtp(email, otpCode) {
 async function verifyOtp(email, otpCode) {
   const now = dayjs().toDate();
   const [rows] = await db.query(
-    `SELECT * FROM psrst_otps WHERE email = ? AND otp_code = ? AND expires_at > ? ORDER BY created_at DESC LIMIT 1`,
+    `SELECT * FROM otps WHERE email = ? AND otp_code = ? AND expires_at > ? ORDER BY created_at DESC LIMIT 1`,
     [email, otpCode, now],
   );
 
@@ -26,13 +26,13 @@ async function verifyOtp(email, otpCode) {
     return false;
   }
 
-  await db.query('DELETE FROM psrst_otps WHERE id = ?', [rows[0].id]);
+  await db.query('DELETE FROM otps WHERE id = ?', [rows[0].id]);
   return true;
 }
 
 async function purgeExpiredOtps() {
   const now = dayjs().toDate();
-  await db.query('DELETE FROM psrst_otps WHERE expires_at <= ?', [now]);
+  await db.query('DELETE FROM otps WHERE expires_at <= ?', [now]);
 }
 
 module.exports = {

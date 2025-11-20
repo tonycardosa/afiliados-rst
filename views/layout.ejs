@@ -42,10 +42,10 @@
       </div>
       <% if (currentUser && currentUser.role === 'admin') { %>
         <nav class="bg-rstgray">
-          <div class="mx-auto flex max-w-7xl flex-wrap gap-4 px-4 py-2 text-sm text-white sm:px-6 lg:px-8">
+          <div class="mx-auto flex max-w-7xl flex-wrap gap-8 px-4 py-2 text-sm text-white sm:px-6 lg:px-8">
             <a href="/dashboard" class="hover:text-rstred">Dashboard</a>
             <a href="/admin/influencers" class="hover:text-rstred">Afiliados</a>
-            <a href="/admin/brands" class="hover:text-rstred">Marcas</a>
+            <a style="display: none" href="/admin/brands" class="hover:text-rstred">Marcas</a>
             <a href="/admin/rules" class="hover:text-rstred">Regras</a>
             <a href="/admin/payouts" class="hover:text-rstred">Pagamentos</a>
           </div>

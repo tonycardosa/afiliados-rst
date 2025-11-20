@@ -18,6 +18,7 @@ const {
   getPendingPayouts,
   markCommissionsAsPaid,
   syncOrders,
+  deleteCommissionById,
 } = require('../services/commissionService');
 const { getSettings } = require('../services/settingsService');
 const prestashopService = require('../services/prestashopService');
@@ -184,6 +185,20 @@ router.post(
   asyncHandler(async (req, res) => {
     const imported = await syncOrders();
     setFlash(req, 'success', `${imported} encomendas sincronizadas.`);
+    res.redirect('/dashboard');
+  }),
+);
+
+router.post(
+  '/admin/orders/:id/delete',
+  asyncHandler(async (req, res) => {
+    const commissionId = Number.parseInt(req.params.id, 10);
+    if (!Number.isInteger(commissionId) || commissionId <= 0) {
+      setFlash(req, 'error', 'Encomenda inválida.');
+      return res.redirect('/dashboard');
+    }
+    await deleteCommissionById(commissionId);
+    setFlash(req, 'success', 'Encomenda removida. Pode ser sincronizada novamente se uma regra se aplicar.');
     res.redirect('/dashboard');
   }),
 );

@@ -17,22 +17,19 @@ function createClient(settings) {
   });
 }
 
-async function fetchOrdersSince(settings, lastOrderId) {
+async function fetchOrders(settings) {
   const client = createClient(settings);
 
-  const filterId = lastOrderId ? `[${Number(lastOrderId) + 1},]` : '';
   const params = {
     display: 'full',
-    sort: '[id_ASC]',
-    'filter[current_state]': '[2|4|5|9|11|15|17|26]',
+    sort: '[id_DESC]',
+    limit: '25',
+    'filter[current_state]': '[2|4|5|9|11|15|17|26]'
   };
-  if (filterId) {
-    params['filter[id]'] = filterId;
-  }
 
   const { data } = await client.get('orders', { params });
   const orders = data.orders || [];
-  if (Array.isArray(orders)) return orders;
+  if (Array.isArray(orders)) return orders.reverse();
   return orders.order || [];
 }
 
@@ -59,6 +56,16 @@ async function fetchBrands(settings) {
   const manufacturers = data.manufacturers || [];
   if (Array.isArray(manufacturers)) return manufacturers;
   return manufacturers.manufacturer || [];
+}
+
+async function fetchProductDetails(settings, productId) {
+  const client = createClient(settings);
+  const { data } = await client.get(`products/${productId}`, {
+    params: { display: 'full' },
+  });
+  const productDetails = data.products[0] || [];
+  if (productDetails) return productDetails;
+  return null;
 }
 
 async function fetchOrderCartRules(settings, orderId) {
@@ -92,9 +99,10 @@ async function fetchCartRuleDetails(settings, cartRuleId) {
 }
 
 module.exports = {
-  fetchOrdersSince,
+  fetchOrders,
   fetchOrderDetails,
   fetchBrands,
   fetchOrderCartRules,
   fetchCartRuleDetails,
+  fetchProductDetails
 };

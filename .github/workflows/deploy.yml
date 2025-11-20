@@ -3,7 +3,7 @@ name: Deploy to cPanel
 on:
   push:
     branches:
-      - main
+      - master
 
 jobs:
   deploy:
@@ -21,7 +21,7 @@ jobs:
           server: ${{ secrets.FTP_HOST }}
           username: ${{ secrets.FTP_USERNAME }}
           password: ${{ secrets.FTP_PASSWORD }}
-          server-dir: /home/redsuper/rstferramentas.com/_influencers/
+          server-dir: /home/redsuper/rstferramentas.com/_afiliados/
           protocol: ftps
           timeout: 600000
           exclude: |

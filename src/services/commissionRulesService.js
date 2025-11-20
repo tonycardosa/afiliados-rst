@@ -3,9 +3,9 @@ const db = require('../config/database');
 async function listRules() {
   const [rows] = await db.query(
     `SELECT cr.*, u.name AS influencer_name, b.name AS brand_name
-     FROM psrst_commission_rules cr
-     JOIN psrst_users u ON u.id = cr.user_id
-     LEFT JOIN psrst_brands b ON b.id = cr.brand_id
+     FROM commission_rules cr
+     JOIN users u ON u.id = cr.user_id
+     LEFT JOIN brands b ON b.id = cr.brand_id
      ORDER BY u.name, b.name`,
   );
   return rows;
@@ -14,8 +14,8 @@ async function listRules() {
 async function listRulesByAfiliado(influencerId) {
   const [rows] = await db.query(
     `SELECT cr.*, b.name AS brand_name
-     FROM psrst_commission_rules cr
-     LEFT JOIN psrst_brands b ON b.id = cr.brand_id
+     FROM commission_rules cr
+     LEFT JOIN brands b ON b.id = cr.brand_id
      WHERE cr.user_id = ?
      ORDER BY brand_name`,
     [influencerId],
@@ -25,7 +25,7 @@ async function listRulesByAfiliado(influencerId) {
 
 async function upsertRule({ userId, brandId, commissionFirst, commissionSubsequent }) {
   await db.query(
-    `INSERT INTO psrst_commission_rules (user_id, brand_id, commission_first, commission_subsequent)
+    `INSERT INTO commission_rules (user_id, brand_id, commission_first, commission_subsequent)
      VALUES (?, ?, ?, ?)
      ON DUPLICATE KEY UPDATE
        commission_first = VALUES(commission_first),
@@ -35,13 +35,13 @@ async function upsertRule({ userId, brandId, commissionFirst, commissionSubseque
 }
 
 async function deleteRule(id) {
-  await db.query('DELETE FROM psrst_commission_rules WHERE id = ?', [id]);
+  await db.query('DELETE FROM commission_rules WHERE id = ?', [id]);
 }
 
 async function findRuleForAfiliadoAndBrand(influencerId, brandId) {
   const params = [influencerId];
-  let sql = 'SELECT * FROM psrst_commission_rules WHERE user_id = ? AND ';
-  if (brandId) {
+  let sql = 'SELECT * FROM commission_rules WHERE user_id = ? AND ';
+  if (brandId !== null && brandId !== undefined) {
     sql += 'brand_id = ?';
     params.push(brandId);
   } else {

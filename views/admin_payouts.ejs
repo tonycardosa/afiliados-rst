@@ -30,7 +30,7 @@
                 <td class="px-4 py-2">
                   <input type="checkbox" class="commission-checkbox" name="commission_ids" value="<%= item.id %>" />
                 </td>
-                <td class="px-4 py-2 font-medium"><%= item.influencer_name %></td>
+                <td class="px-4 py-2 font-medium"><%= item.afiliado_name %></td>
                 <td class="px-4 py-2">#<%= item.prestashop_order_id %></td>
                 <td class="px-4 py-2">€ <%= Number(item.order_total_with_vat).toFixed(2) %></td>
                 <td class="px-4 py-2 font-semibold text-rstred">€ <%= Number(item.commission_earned).toFixed(2) %></td>
