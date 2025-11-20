@@ -255,9 +255,7 @@ async function listCommissionOrders({ afiliadoId = null, limit = 50 } = {}) {
     for (const detail of Array.isArray(orderDetails) ? orderDetails : []) {
       const productId = Number(detail.product_id);
       const quantity = Number(detail.product_quantity || 1);
-      const priceBase = Number(detail.total_price_tax_incl || 0);
-      const fallbackUnit =
-        Number(detail.unit_price_tax_incl || 0) * (Number.isNaN(quantity) ? 1 : quantity);
+      const priceBase = Number(detail.unit_price_tax_incl || 0) * (Number.isNaN(quantity) ? 1 : quantity);
       const priceWithVat = Number.isNaN(priceBase) || priceBase === 0 ? fallbackUnit : priceBase;
 
       let prestashopBrandId = null;
@@ -297,6 +295,7 @@ async function listCommissionOrders({ afiliadoId = null, limit = 50 } = {}) {
         brandName: brand ? brand.name : fallbackBrandName,
         prestashopBrandId: prestashopBrandId || null,
         productId,
+        reference: detail.reference,
         name: detail.product_name,
         quantity: Number.isNaN(quantity) ? 1 : quantity,
         priceWithVat,

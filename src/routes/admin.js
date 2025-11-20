@@ -29,10 +29,11 @@ function setFlash(req, type, message) {
   req.session.flash = { type, message };
 }
 
-router.use(isAuthenticated, isAdmin);
+router.use(isAuthenticated);
 
 router.get(
   '/admin/influencers',
+  isAdmin,
   asyncHandler(async (req, res) => {
     const influencers = await listAfiliados();
     res.render('admin_influencers', { title: 'Afiliados', influencers });
@@ -41,10 +42,11 @@ router.get(
 
 router.post(
   '/admin/influencers',
+  isAdmin,
   asyncHandler(async (req, res) => {
     const { name, email } = req.body;
     if (!name || !email) {
-      setFlash(req, 'error', 'Nome e email são obrigatórios.');
+      setFlash(req, 'error', 'Nome e email sǜo obrigat��rios.');
       return res.redirect('/admin/influencers');
     }
     await createAfiliado({ name, email });
@@ -55,10 +57,11 @@ router.post(
 
 router.get(
   '/admin/influencers/:id',
+  isAdmin,
   asyncHandler(async (req, res) => {
     const influencer = await getUserWithDiscountCodes(req.params.id);
     if (!influencer) {
-      return res.status(404).render('errors/404', { title: 'Não encontrado' });
+      return res.status(404).render('errors/404', { title: 'Nǜo encontrado' });
     }
     res.render('admin_influencer_edit', { title: 'Editar afiliado', influencer });
   }),
@@ -66,29 +69,32 @@ router.get(
 
 router.post(
   '/admin/influencers/:id/codes',
+  isAdmin,
   asyncHandler(async (req, res) => {
     const { prestashop_code: code } = req.body;
     if (!code) {
-      setFlash(req, 'error', 'Código obrigatório.');
+      setFlash(req, 'error', 'C��digo obrigat��rio.');
       return res.redirect(`/admin/influencers/${req.params.id}`);
     }
     await addDiscountCode(req.params.id, code.trim());
-    setFlash(req, 'success', 'Código adicionado.');
+    setFlash(req, 'success', 'C��digo adicionado.');
     res.redirect(`/admin/influencers/${req.params.id}`);
   }),
 );
 
 router.post(
   '/admin/influencers/:id/codes/:codeId/delete',
+  isAdmin,
   asyncHandler(async (req, res) => {
     await removeDiscountCode(req.params.codeId);
-    setFlash(req, 'success', 'Código removido.');
+    setFlash(req, 'success', 'C��digo removido.');
     res.redirect(`/admin/influencers/${req.params.id}`);
   }),
 );
 
 router.get(
   '/admin/brands',
+  isAdmin,
   asyncHandler(async (req, res) => {
     const brands = await listBrands();
     res.render('admin_brands', { title: 'Marcas', brands });
@@ -97,6 +103,7 @@ router.get(
 
 router.post(
   '/admin/brands/sync',
+  isAdmin,
   asyncHandler(async (req, res) => {
     const settings = await getSettings();
     if (!settings.prestashop_api_key || !settings.prestashop_api_url) {
@@ -121,17 +128,18 @@ router.get(
     const influencers = await listAfiliados();
     const brands = await listBrands();
     const rules = await listRules();
-    res.render('admin_rules', { title: 'Regras de comissão', influencers, brands, rules });
+    res.render('admin_rules', { title: 'Regras de comissǜo', influencers, brands, rules });
   }),
 );
 
 router.post(
   '/admin/rules',
+  isAdmin,
   asyncHandler(async (req, res) => {
     const { user_id: userId, brand_id: brandId, commission_first: first, commission_subsequent: subsequent } =
       req.body;
     if (!userId || !first || !subsequent) {
-      setFlash(req, 'error', 'Preencha todos os campos obrigatórios.');
+      setFlash(req, 'error', 'Preencha todos os campos obrigat��rios.');
       return res.redirect('/admin/rules');
     }
     await upsertRule({
@@ -147,6 +155,7 @@ router.post(
 
 router.post(
   '/admin/rules/:id/delete',
+  isAdmin,
   asyncHandler(async (req, res) => {
     await deleteRule(req.params.id);
     setFlash(req, 'success', 'Regra removida.');
@@ -164,6 +173,7 @@ router.get(
 
 router.post(
   '/admin/payouts/mark-paid',
+  isAdmin,
   asyncHandler(async (req, res) => {
     const ids = Array.isArray(req.body.commission_ids)
       ? req.body.commission_ids
@@ -171,17 +181,18 @@ router.post(
         ? [req.body.commission_ids]
         : [];
     if (!ids.length) {
-      setFlash(req, 'error', 'Selecione pelo menos uma comissão.');
+      setFlash(req, 'error', 'Selecione pelo menos uma comissǜo.');
       return res.redirect('/admin/payouts');
     }
     await markCommissionsAsPaid(ids);
-    setFlash(req, 'success', 'Comissões marcadas como pagas.');
+    setFlash(req, 'success', 'Comiss��es marcadas como pagas.');
     res.redirect('/admin/payouts');
   }),
 );
 
 router.post(
   '/admin/orders/sync',
+  isAdmin,
   asyncHandler(async (req, res) => {
     const imported = await syncOrders();
     setFlash(req, 'success', `${imported} encomendas sincronizadas.`);
@@ -191,10 +202,11 @@ router.post(
 
 router.post(
   '/admin/orders/:id/delete',
+  isAdmin,
   asyncHandler(async (req, res) => {
     const commissionId = Number.parseInt(req.params.id, 10);
     if (!Number.isInteger(commissionId) || commissionId <= 0) {
-      setFlash(req, 'error', 'Encomenda inválida.');
+      setFlash(req, 'error', 'Encomenda invǭlida.');
       return res.redirect('/dashboard');
     }
     await deleteCommissionById(commissionId);

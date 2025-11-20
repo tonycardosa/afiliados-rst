@@ -89,7 +89,7 @@
                            const productLink = `https://rstferramentas.com/index.php?controller=product&id_product=${product.productId}`;
                       %>
                         <tr class="border-t">
-                          <td class="px-3 py-2 text-gray-600"><%= product.brandName || '�?"' %></td>
+                          <td class="px-3 py-2 text-gray-600"><%= product.brandName || '--' %></td>
                           <td class="px-3 py-2 font-medium text-rstgray">
                             <a class="hover:underline" href="<%= productLink %>" target="_blank" rel="noopener noreferrer"><%= product.name || 'Produto' %></a>
                           </td>
