@@ -4,6 +4,7 @@ const { isAuthenticated, isAdmin } = require('../middleware/auth');
 const {
   listAfiliados,
   createAfiliado,
+  deleteAfiliado,
   getUserWithDiscountCodes,
   addDiscountCode,
   removeDiscountCode,
@@ -51,6 +52,35 @@ router.post(
     }
     await createAfiliado({ name, email });
     setFlash(req, 'success', 'Afiliado criado com sucesso.');
+    res.redirect('/admin/influencers');
+  }),
+);
+
+router.post(
+  '/admin/influencers/:id/delete',
+  isAdmin,
+  asyncHandler(async (req, res) => {
+    const influencerId = Number.parseInt(req.params.id, 10);
+    if (!Number.isInteger(influencerId) || influencerId <= 0) {
+      setFlash(req, 'error', 'Afiliado invalido.');
+      return res.redirect('/admin/influencers');
+    }
+
+    try {
+      const deleted = await deleteAfiliado(influencerId);
+      if (!deleted) {
+        setFlash(req, 'error', 'Afiliado nao encontrado.');
+      } else {
+        setFlash(req, 'success', 'Afiliado removido com sucesso.');
+      }
+    } catch (error) {
+      if (error.code === 'ER_ROW_IS_REFERENCED_2' || error.errno === 1451) {
+        setFlash(req, 'error', 'Afiliado com dados associados nao pode ser removido.');
+        return res.redirect('/admin/influencers');
+      }
+      throw error;
+    }
+
     res.redirect('/admin/influencers');
   }),
 );

@@ -25,6 +25,11 @@ async function createAfiliado({ name, email }) {
   );
 }
 
+async function deleteAfiliado(id) {
+  const [result] = await db.query('DELETE FROM users WHERE id = ? AND role = "influencer"', [id]);
+  return result.affectedRows;
+}
+
 async function getUserWithDiscountCodes(id) {
   const [users] = await db.query('SELECT * FROM users WHERE id = ?', [id]);
   if (!users.length) {
@@ -55,6 +60,7 @@ module.exports = {
   findUserById,
   listAfiliados,
   createAfiliado,
+  deleteAfiliado,
   getUserWithDiscountCodes,
   addDiscountCode,
   removeDiscountCode,

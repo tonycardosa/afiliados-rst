@@ -18,7 +18,20 @@
               <td class="px-4 py-2"><%= inf.email %></td>
               <td class="px-4 py-2 text-gray-500"><%= new Date(inf.created_at).toLocaleDateString() %></td>
               <td class="px-4 py-2 text-right">
-                <a href="/admin/influencers/<%= inf.id %>" class="text-sm font-semibold text-rstred underline">Editar</a>
+                <div class="flex items-center justify-end gap-3">
+                  <a href="/admin/influencers/<%= inf.id %>" class="text-sm font-semibold text-rstred underline">Editar</a>
+                  <form
+                    method="POST"
+                    action="/admin/influencers/<%= inf.id %>/delete"
+                    onsubmit="return confirm('Tem a certeza que quer remover este afiliado?');">
+                    <button
+                      type="submit"
+                      class="rounded bg-red-50 px-3 py-1 text-sm font-semibold text-red-600 hover:bg-red-100"
+                      aria-label="Eliminar afiliado">
+                      Eliminar
+                    </button>
+                  </form>
+                </div>
               </td>
             </tr>
           <% }) %>

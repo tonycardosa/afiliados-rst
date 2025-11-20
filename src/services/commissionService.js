@@ -295,7 +295,7 @@ async function listCommissionOrders({ afiliadoId = null, limit = 50 } = {}) {
         brandName: brand ? brand.name : fallbackBrandName,
         prestashopBrandId: prestashopBrandId || null,
         productId,
-        reference: detail.reference,
+        reference: detail.product_reference,
         name: detail.product_name,
         quantity: Number.isNaN(quantity) ? 1 : quantity,
         priceWithVat,

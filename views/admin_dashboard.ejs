@@ -78,6 +78,7 @@
                     <thead class="text-xs uppercase text-gray-500">
                       <tr>
                         <th class="px-3 py-2" style="width:175px">Marca</th>
+                        <th class="px-3 py-2">Referência</th>
                         <th class="px-3 py-2">Produto</th>
                         <th class="px-3 py-2" style="width: 110px;">Quantidade</th>
                         <th class="px-3 py-2" style="width: 110px;">Preço</th>
@@ -90,6 +91,7 @@
                       %>
                         <tr class="border-t">
                           <td class="px-3 py-2 text-gray-600"><%= product.brandName || '--' %></td>
+                          <td class="px-3 py-2 text-gray-600"><%= product.reference %></td>
                           <td class="px-3 py-2 font-medium text-rstgray">
                             <a class="hover:underline" href="<%= productLink %>" target="_blank" rel="noopener noreferrer"><%= product.name || 'Produto' %></a>
                           </td>
