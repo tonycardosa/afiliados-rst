@@ -10,6 +10,7 @@
           <tr>
             <th class="px-4 py-2">Encomenda</th>
             <th class="px-4 py-2">Total</th>
+            <th class="px-4 py-2">Total (s/IVA)</th>
             <th class="px-4 py-2">Comissão</th>
             <th class="px-4 py-2">Tipo</th>
             <th class="px-4 py-2">Estado</th>
@@ -21,6 +22,7 @@
             <tr class="border-t">
               <td class="px-4 py-2">#<%= commission.prestashop_order_id %></td>
               <td class="px-4 py-2">€ <%= Number(commission.order_total_with_vat).toFixed(2) %></td>
+              <td class="px-4 py-2">€ <%= Number(commission.order_total_without_vat || 0).toFixed(2) %></td>
               <td class="px-4 py-2 font-semibold text-rstred">€ <%= Number(commission.commission_earned).toFixed(2) %></td>
               <td class="px-4 py-2"><%= commission.is_first_purchase_commission ? 'Primeira compra' : 'Seguinte' %></td>
               <td class="px-4 py-2 capitalize"><%= commission.status %></td>
@@ -29,7 +31,7 @@
           <% }) %>
           <% if (!commissions.length) { %>
             <tr>
-              <td colspan="6" class="px-4 py-6 text-center text-sm text-gray-500">Sem comissões registadas.</td>
+              <td colspan="7" class="px-4 py-6 text-center text-sm text-gray-500">Sem comissões registadas.</td>
             </tr>
           <% } %>
         </tbody>

@@ -103,11 +103,11 @@ router.post(
   asyncHandler(async (req, res) => {
     const { prestashop_code: code } = req.body;
     if (!code) {
-      setFlash(req, 'error', 'C��digo obrigat��rio.');
+      setFlash(req, 'error', 'Código obrigatório.');
       return res.redirect(`/admin/influencers/${req.params.id}`);
     }
     await addDiscountCode(req.params.id, code.trim());
-    setFlash(req, 'success', 'C��digo adicionado.');
+    setFlash(req, 'success', 'Código adicionado.');
     res.redirect(`/admin/influencers/${req.params.id}`);
   }),
 );
@@ -117,7 +117,7 @@ router.post(
   isAdmin,
   asyncHandler(async (req, res) => {
     await removeDiscountCode(req.params.codeId);
-    setFlash(req, 'success', 'C��digo removido.');
+    setFlash(req, 'success', 'Código removido.');
     res.redirect(`/admin/influencers/${req.params.id}`);
   }),
 );

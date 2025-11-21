@@ -10,10 +10,10 @@
     </div>
   </div>
   <div class="rounded-lg bg-white p-6 shadow">
-    <h2 class="mb-4 text-lg font-semibold text-rstgray">Sincronizacao manual</h2>
+    <h2 class="mb-4 text-lg font-semibold text-rstgray">Sincronização manual</h2>
     <form method="POST" action="/admin/orders/sync" class="space-y-4">
       <p class="text-sm text-gray-600">
-        Gera comissoes para encomendas recentes do Prestashop nas situacoes em que exista um afiliado associado.
+        Gera comissões para encomendas recentes do Prestashop nas situações em que exista um afiliado associado.
       </p>
       <button
         type="submit"
@@ -25,8 +25,8 @@
   <div class="rounded-lg bg-white p-6 shadow">
     <div class="mb-4 flex items-center justify-between">
       <div>
-        <h2 class="text-lg font-semibold text-rstgray">Encomendas atribuidas</h2>
-        <p class="text-sm text-gray-500">Clique para ver os produtos e comissoes por linha.</p>
+        <h2 class="text-lg font-semibold text-rstgray">Encomendas atribuídas</h2>
+        <p class="text-sm text-gray-500">Clique para ver os produtos e comissões por linha.</p>
       </div>
     </div>
     <div class="overflow-x-auto">
@@ -37,6 +37,7 @@
             <th class="px-4 py-2">Afiliado</th>
             <th class="px-4 py-2">Primeira compra</th>
             <th class="px-4 py-2">Total</th>
+            <th class="px-4 py-2">Total (s/IVA)</th>
             <th class="px-4 py-2">Comissão</th>
             <th class="px-4 py-2">Data</th>
             <th class="px-4 py-2 text-right"></th>
@@ -56,6 +57,7 @@
               <td class="px-4 py-2 font-medium text-rstgray"><%= order.afiliado_name %></td>
               <td class="px-4 py-2"><%= order.is_first_purchase_commission ? 'Sim' : 'Nao' %></td>
               <td class="px-4 py-2">&euro; <%= Number(order.order_total_with_vat || 0).toFixed(2) %></td>
+              <td class="px-4 py-2">&euro; <%= Number(order.order_total_without_vat || 0).toFixed(2) %></td>
               <td class="px-4 py-2 font-semibold text-rstred">
                 &euro; <%= Number(order.commission_earned || 0).toFixed(2) %>
                 <% if (uniquePerc.length === 1) { %>
@@ -72,7 +74,7 @@
               </td>
             </tr>
             <tr id="order-<%= order.id %>" class="hidden border-t bg-gray-50">
-              <td colspan="7" class="px-4 py-3">
+              <td colspan="8" class="px-4 py-3">
                 <div class="overflow-x-auto">
                   <table class="min-w-full text-sm">
                     <thead class="text-xs uppercase text-gray-500">
@@ -81,7 +83,7 @@
                         <th class="px-3 py-2">Referência</th>
                         <th class="px-3 py-2">Produto</th>
                         <th class="px-3 py-2" style="width: 110px;">Quantidade</th>
-                        <th class="px-3 py-2" style="width: 110px;">Preço</th>
+                        <th class="px-3 py-2" style="width: 110px;">Preço (s/IVA)</th>
                         <th class="px-3 py-2" style="width: 110px;">Comissão</th>
                       </tr>
                     </thead>
@@ -96,7 +98,7 @@
                             <a class="hover:underline" href="<%= productLink %>" target="_blank" rel="noopener noreferrer"><%= product.name || 'Produto' %></a>
                           </td>
                           <td class="px-3 py-2"><%= product.quantity %></td>
-                          <td class="px-3 py-2">&euro; <%= Number(product.priceWithVat || 0).toFixed(2) %></td>
+                          <td class="px-3 py-2">&euro; <%= Number(product.priceWithoutVat || 0).toFixed(2) %></td>
                           <td class="px-3 py-2 font-semibold text-rstred">
                             &euro; <%= Number(product.commissionAmount || 0).toFixed(2) %>
                             <% if (product.percentage != null) { %>
@@ -120,7 +122,7 @@
           <% }) %>
           <% if (!orders.length) { %>
             <tr>
-              <td colspan="7" class="px-4 py-6 text-center text-sm text-gray-500">Sem encomendas atribuidas.</td>
+              <td colspan="8" class="px-4 py-6 text-center text-sm text-gray-500">Sem encomendas atribuidas.</td>
             </tr>
           <% } %>
         </tbody>

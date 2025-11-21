@@ -44,6 +44,7 @@ CREATE TABLE IF NOT EXISTS commissions (
     customer_id INT NOT NULL,
     afiliado_id INT NOT NULL,
     order_total_with_vat DECIMAL(10,2) NOT NULL,
+    order_total_without_vat DECIMAL(10,2) NOT NULL DEFAULT 0,
     commission_earned DECIMAL(10,2) NOT NULL,
     is_first_purchase_commission BOOLEAN NOT NULL DEFAULT FALSE,
     status ENUM('pending', 'paid') NOT NULL DEFAULT 'pending',

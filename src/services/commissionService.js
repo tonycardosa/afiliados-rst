@@ -115,21 +115,23 @@ async function insertCommission({
   customerId,
   afiliadoId,
   orderTotalWithVat,
+  orderTotalWithoutVat,
   commissionEarned,
   isFirstPurchase,
   orderCreatedAt,
 }) {
   await db.query(
     `INSERT INTO commissions 
-      (prestashop_order_id, customer_id, afiliado_id, order_total_with_vat, commission_earned, is_first_purchase_commission, status, order_created_at)
-     VALUES (?, ?, ?, ?, ?, ?, 'pending', ?)
+      (prestashop_order_id, customer_id, afiliado_id, order_total_with_vat, order_total_without_vat, commission_earned, is_first_purchase_commission, status, order_created_at)
+     VALUES (?, ?, ?, ?, ?, ?, ?, 'pending', ?)
     `,
     [
       prestashopOrderId,
       customerId,
       afiliadoId,
-      orderTotalWithVat,
-      commissionEarned,
+      Number.isNaN(Number(orderTotalWithVat)) ? 0 : Number(orderTotalWithVat),
+      Number.isNaN(Number(orderTotalWithoutVat)) ? 0 : Number(orderTotalWithoutVat),
+      Number.isNaN(Number(commissionEarned)) ? 0 : Number(commissionEarned),
       isFirstPurchase ? 1 : 0,
       orderCreatedAt,
     ],
@@ -174,7 +176,9 @@ async function determineAfiliadoFromOrder(order, cartRules, settings) {
 
 async function calculateCommissionForOrder({ order, orderDetails, afiliadoId, isFirst }) {
   let commissionTotal = 0;
-  let orderTotalWithVat = 0;
+  let orderTotalWithoutVat = 0;
+  const rawOrderTotalWithVat = Number(order?.total_paid_tax_incl ?? order?.total_paid ?? 0);
+  const orderTotalWithVat = Number.isNaN(rawOrderTotalWithVat) ? 0 : rawOrderTotalWithVat;
 
   const productsArray = (order.associations && order.associations.order_rows && Array.isArray(order.associations.order_rows))
     ? order.associations.order_rows
@@ -186,15 +190,13 @@ async function calculateCommissionForOrder({ order, orderDetails, afiliadoId, is
       orderDetailsMap.set(detailProductId, detail);
     }
   }
-  const brandCache = new Map();
 
   for (const product of productsArray) {
-    const price = Number(product.unit_price_tax_incl || 0);
-    orderTotalWithVat += price;
+    const price = Number(product.unit_price_tax_excl || 0);
+    orderTotalWithoutVat += price;
 
     const productId = Number(product.product_id);
-    let brand = await findBrandByProductPrestashopId(productId) ?? null;
-    brandCache.set(brand.id, brand.name);
+    const brand = await findBrandByProductPrestashopId(productId);
 
     let rule = null;
     if (brand) {
@@ -212,7 +214,7 @@ async function calculateCommissionForOrder({ order, orderDetails, afiliadoId, is
     commissionTotal += price * (Number(percentage) / 100);
   }
 
-  return { commissionTotal, orderTotalWithVat };
+  return { commissionTotal, orderTotalWithoutVat, orderTotalWithVat };
 }
 
 async function listCommissionOrders({ afiliadoId = null, limit = 50 } = {}) {
@@ -255,9 +257,11 @@ async function listCommissionOrders({ afiliadoId = null, limit = 50 } = {}) {
     for (const detail of Array.isArray(orderDetails) ? orderDetails : []) {
       const productId = Number(detail.product_id);
       const quantity = Number(detail.product_quantity || 1);
-      const priceBase = Number(detail.unit_price_tax_incl || 0) * (Number.isNaN(quantity) ? 1 : quantity);
-      const priceWithVat = Number.isNaN(priceBase) || priceBase === 0 ? fallbackUnit : priceBase;
+      const safeQuantity = Number.isNaN(quantity) ? 1 : quantity;
+      const priceBase = Number(detail.unit_price_tax_excl || 0) * safeQuantity;
+      const priceWithoutVat = Number.isNaN(priceBase) ? 0 : priceBase;
 
+      let brand = null;
       let prestashopBrandId = null;
       const productDetails = await prestashopService.fetchProductDetails(settings, productId);
       if(productDetails){
@@ -266,8 +270,11 @@ async function listCommissionOrders({ afiliadoId = null, limit = 50 } = {}) {
       }
 
       if (!Number.isNaN(prestashopBrandId) && prestashopBrandId) {
-          brand = await findBrandByPrestashopId(prestashopBrandId);
-          brandCache.set(prestashopBrandId, brand || null);
+          brand = brandCache.get(prestashopBrandId) || null;
+          if (!brand) {
+            brand = await findBrandByPrestashopId(prestashopBrandId);
+            brandCache.set(prestashopBrandId, brand || null);
+          }
       }
 
       let rule = null;
@@ -287,7 +294,7 @@ async function listCommissionOrders({ afiliadoId = null, limit = 50 } = {}) {
             )
           : null;
       const commissionAmount =
-        percentage != null ? priceWithVat * (Number(percentage) / 100) : 0;
+        percentage != null ? priceWithoutVat * (Number(percentage) / 100) : 0;
 
       const fallbackBrandName = prestashopBrandId ? `Marca ${prestashopBrandId}` : null;
 
@@ -297,8 +304,8 @@ async function listCommissionOrders({ afiliadoId = null, limit = 50 } = {}) {
         productId,
         reference: detail.product_reference,
         name: detail.product_name,
-        quantity: Number.isNaN(quantity) ? 1 : quantity,
-        priceWithVat,
+        quantity: safeQuantity,
+        priceWithoutVat,
         commissionAmount,
         percentage,
       });
@@ -344,7 +351,7 @@ async function syncOrders() {
     const isFirst = previousCount === 0;
 
     const orderDetails = await prestashopService.fetchOrderDetails(settings, order.id);
-    const { commissionTotal, orderTotalWithVat } = await calculateCommissionForOrder({
+    const { commissionTotal, orderTotalWithoutVat, orderTotalWithVat } = await calculateCommissionForOrder({
       order,
       orderDetails,
       afiliadoId,
@@ -358,6 +365,7 @@ async function syncOrders() {
       customerId: customer.id,
       afiliadoId,
       orderTotalWithVat,
+      orderTotalWithoutVat,
       commissionEarned: commissionTotal,
       isFirstPurchase: isFirst,
       orderCreatedAt: dayjs(order.date_add).toDate(),
